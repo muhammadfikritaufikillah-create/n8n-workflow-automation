@@ -1,0 +1,114 @@
+{
+  "name": "Jakarta Weather Monitor - Auto Fetch & Process",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "06504f6b-bb52-4546-9ed4-322526b84e2f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=-6.2088&longitude=106.8456&current_weather=true",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c0388db3-8610-44bb-91b2-588c26b5a852",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Ambil data dari HTTP Request sebelumnya\nconst weatherData = $input.first().json;\n\n// Ambil data cuaca yang kita butuhkan\nconst currentWeather = weatherData.current_weather;\n\n// Buat objek yang rapi\nconst result = {\n  timestamp: new Date().toISOString(),\n  location: \"Jakarta, Indonesia\",\n  temperature_celsius: currentWeather.temperature,\n  windspeed_kmh: currentWeather.windspeed,\n  weathercode: currentWeather.weathercode,\n  is_day: currentWeather.is_day === 1 ? \"Siang\" : \"Malam\",\n  summary: `Suhu ${currentWeather.temperature}°C, Angin ${currentWeather.windspeed} km/h`\n};\n\nreturn [{ json: result }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "85937f56-38a8-48ec-8f58-d2a29629ab94",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2026-04-05T04:45:41.465-04:00",
+          "Readable date": "April 5th 2026, 4:45:41 am",
+          "Readable time": "4:45:41 am",
+          "Day of week": "Sunday",
+          "Year": "2026",
+          "Month": "April",
+          "Day of month": "05",
+          "Hour": "04",
+          "Minute": "45",
+          "Second": "41",
+          "Timezone": "America/New_York (UTC-04:00)"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "25d23f5f-1db6-4133-93ed-cc49685bf77e",
+  "meta": {
+    "instanceId": "0cd086f74261bbe889b6a256f84ed04e6fdaacb0bfa01a83b953ca282ff8f5e7"
+  },
+  "id": "2riwemH4NqjwacUL",
+  "tags": []
+}
